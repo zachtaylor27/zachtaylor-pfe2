@@ -1,0 +1,98 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def load_data():
+    types_df = pd.read_csv("../data/poke_types.csv")
+    pokemon_df = pd.read_csv("../data/poke.csv")
+    return types_df, pokemon_df
+
+def plot_pokemon    _types():
+    types_df, _ = load_data()
+    type_counts = types_df['type_name'].value_counts()
+    
+    plt.figure(figsize=(10, 6))
+    type_counts.plot(kind='bar', color='skyblue')
+    plt.xlabel("Type")
+    plt.ylabel("Count")
+    plt.title("Number of Pokemon per Type")
+    plt.xticks(rotation=45)
+    plt.show()
+
+def plot_pokemon_type():
+    _, pokemon_df = load_data()
+    user_type = input("Enter a Pokemon type: ")
+    if user_type not in pokemon_df['type_name'].unique():
+        print("Invalid type.")
+        return
+    
+    gen_counts = pokemon_df[pokemon_df['type_name'] == user_type]['generation'].value_counts().sort_index()
+    
+    plt.figure(figsize=(8, 5))
+    gen_counts.plot(kind='bar', color='orange')
+    plt.xlabel("Generation")
+    plt.ylabel("Count")
+    plt.title(f"Number of {user_type} Pokemon by Generation")
+    plt.xticks(rotation=0)
+    plt.show()
+
+def plot_average_strength_by_generation():
+    _, pokemon_df = load_data()
+    user_type = input("Enter a Pokemon type: ")
+    
+    if user_type not in pokemon_df['type_name'].unique():
+        print("Invalid type.")
+        return
+    
+    pokemon_df['strength'] = (5 * pokemon_df['height'] + 2 * pokemon_df['weight'] + pokemon_df['base_experience'])
+    avg_strength = pokemon_df[pokemon_df['type_name'] == user_type].groupby('generation')['strength'].mean()
+    
+    plt.figure(figsize=(8, 5))
+    avg_strength.plot(kind='line', marker='o', color='green')
+    plt.xlabel("Generation")
+    plt.ylabel("Average Strength")
+    plt.title(f"Average Strength of {user_type} Pokemon by Generation")
+    plt.show()
+
+def plot_strength_stats_by_generation():
+    _, pokemon_df = load_data()
+    
+    pokemon_df['strength'] = (5 * pokemon_df['height'] + 2 * pokemon_df['weight'] + pokemon_df['base_experience'])
+    strength_stats = pokemon_df.groupby('type_name')['strength'].agg(['mean', 'min', 'max'])
+    
+    plt.figure(figsize=(8, 5))
+    strength_stats.plot(kind='bar', colormap='coolwarm')
+    plt.xlabel("Pokemon Type")
+    plt.ylabel("Strength")
+    plt.title("Strength Statistics by Pokemon Type")
+    plt.xticks(rotation=45)
+    plt.show()
+
+def plot_comparison_graphs():
+    _, pokemon_df = load_data()
+    
+    poke1 = input("Enter first Pokemon name: ")
+    poke2 = input("Enter second Pokemon name: ")
+    
+    poke1_data = pokemon_df[pokemon_df['name'] == poke1]
+    poke2_data = pokemon_df[pokemon_df['name'] == poke2]
+    
+    if poke1_data.empty or poke2_data.empty:
+        print("One or both Pokemon names are invalid.")
+        return
+    
+    poke1_exp = poke1_data['base_experience'].values[0]
+    poke2_exp = poke2_data['base_experience'].values[0]
+    
+    poke1_strength = 5 * poke1_data['height'].values[0] + 2 * poke1_data['weight'].values[0] + poke1_exp
+    poke2_strength = 5 * poke2_data['height'].values[0] + 2 * poke2_data['weight'].values[0] + poke2_exp
+    
+    winner = poke1 if poke1_strength > poke2_strength else poke2
+    
+    fig, axs = plt.subplots(3, 2, figsize=(10, 10))
+    axs[0, 0].bar(['Height', 'Weight', 'Experience'], [poke1_data['height'].values[0], poke1_data['weight'].values[0], poke1_exp], color='blue')
+    axs[0, 1].bar(['Height', 'Weight', 'Experience'], [poke2_data['height'].values[0], poke2_data['weight'].values[0], poke2_exp], color='red')
+    axs[1, 0].text(0.5, 0.5, winner, fontsize=20, ha='center')
+    plt.show()
+
+if __name__ == "__main__":
+    plot_pokemon_types()
